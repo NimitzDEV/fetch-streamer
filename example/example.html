@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="../dist/fetch-streamer.min.js"></script>
+  <script type="application/javascript">
+    function fixedLength() {
+      const stream = new FetchStreamer("http://localhost:5001/?type=fixed", 32, 'utf-8');
+      stream.onData((data, info) => {
+        console.log('data', data.length, data, info.targetSize)
+      })
+
+      stream.onFinish(console.log)
+
+      stream.start();
+    }
+
+    function dynamicLength() {
+      const stream = new FetchStreamer("http://localhost:5001/?type=dynamic", 2, 'utf-8');
+      stream.onData((data, info) => {
+        if (info.targetSize === 2) {
+          console.log('next chunk size should be', +data);
+          return +data;
+        } else {
+          console.log('reading chunk', data.length, data);
+          return 2;
+        }
+      })
+
+      stream.onFinish(console.log)
+
+      stream.start();
+    }
+  </script>
+</head>
+<body>
+  Fire up test-server.js, and
+  open devtool to see results
+  <button onclick="fixedLength()">Fixed length example</button>
+  <button onclick="dynamicLength()">Dynamic length example</button>
+</body>
+</html>
